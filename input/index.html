@@ -103,7 +103,9 @@
         </div>
         <div class="preferences hidden">
             <strong>Opening Hours (HH:MM)</strong>
-            <input type="text" class="input-text opening-hours-input" placeholder="Enter opening hours">
+            <div><input type="text" class="input-text start-opening-hours-input" placeholder="Start opening hours">
+            </div>
+            <div><input type="text" class="input-text end-opening-hours-input" placeholder="Latest opening hours"></div>
         </div>
         <div class="preferences hidden">
             <strong>Accessibility</strong>
@@ -133,14 +135,19 @@
         // Global configuration variables
         const targetLowPriceValue = getTargetLowPriceValue(); // Value in the range 15-30
         const targetHighPriceValue = getTargetHighPriceValue(); // Value in the range 60-75
-        const targetOpeningHours = "13:00"; // Target value for opening hours for reference and comparison
+        const targetStartOpeningHours = "09:00"; // New global variable for the earliest opening hours
+        const targetEndOpeningHours = "17:00"; // Updated global variable for the latest opening hours
 
         window.onload = function () {
             const lowPriceRangeInput = document.querySelector('.low-price-range-input');
             const highPriceRangeInput = document.querySelector('.high-price-range-input');
-            const openingHoursInput = document.querySelector('.opening-hours-input');
+            const startOpeningHoursInput = document.querySelector('.start-opening-hours-input'); // New input for earliest opening hours
+            const endOpeningHoursInput = document.querySelector('.end-opening-hours-input'); // Updated for latest opening hours
             const startStopBtn = document.getElementById('startStopBtn');
             const infoBox = document.querySelector('.info-box');
+            const museumsCheckbox = document.querySelector('input[name="museums"]'); // Selecting the museums checkbox
+            const parksCheckbox = document.querySelector('input[name="parks"]'); // Selecting the museums checkbox
+            const historicalCheckbox = document.querySelector('input[name="historical"]'); // Selecting the museums checkbox
             let timer = null;
             let startTime = null;
 
@@ -176,13 +183,14 @@
                 });
 
                 if (startStopBtn.textContent === 'Start') {
-                    infoBox.textContent = `Change the Price range value from ${targetLowPriceValue} to ${targetHighPriceValue} and Opening Hours to ${targetOpeningHours}`;
+                    infoBox.textContent = `Select only the 'Museums' attraction, change the Price range value between ${targetLowPriceValue} and ${targetHighPriceValue} and Opening Hours between ${targetStartOpeningHours} and ${targetEndOpeningHours}`;
                     startTime = new Date();
                     timer = setInterval(function () { }, 100);
                     startStopBtn.textContent = 'Stop';
                 } else {
-                    const openingHours = openingHoursInput.value;
-                    if (validateAndAdjustPriceRanges() && isValidOpeningHours(openingHours) && openingHours === targetOpeningHours) {
+                    const startOpeningHours = startOpeningHoursInput.value;
+                    const endOpeningHours = endOpeningHoursInput.value;
+                    if (validateAndAdjustPriceRanges() && isValidOpeningHours(startOpeningHours) && isValidOpeningHours(endOpeningHours) && startOpeningHours === targetStartOpeningHours && endOpeningHours === targetEndOpeningHours && museumsCheckbox.checked && !parksCheckbox.checked && !historicalCheckbox.checked) {
                         clearInterval(timer);
                         const now = new Date();
                         const totalTime = ((now - startTime) / 1000).toFixed(2);
