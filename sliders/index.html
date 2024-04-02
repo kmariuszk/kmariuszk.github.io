@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preferences Screen (Sliders)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            width: 300px;
+            margin: 50px auto;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        .preferences {
+            margin-bottom: 20px;
+        }
+
+        .slider-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider-label {
+            flex: 1;
+        }
+
+        .slider {
+            flex: 3;
+        }
+
+        .checkbox-container {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Add these styles to your styles.css file */
+        .info-box {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f0f0f0;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        #startStopBtn {
+            display: block;
+            width: 100px;
+            padding: 10px;
+            margin: 10px auto;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #startStopBtn:hover {
+            background-color: #0056b3;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="info-box">Click Start when ready</div>
+        <button id="startStopBtn">Start</button>
+        <div class="preferences hidden">
+            <h2>Preferences</h2>
+            <strong>Attractions</strong>
+            <div class="checkbox-container">
+                <label><input type="checkbox" name="museums"> Museums</label>
+                <label><input type="checkbox" name="parks"> Parks</label>
+                <label><input type="checkbox" name="historical"> Historical Sites</label>
+            </div>
+        </div>
+        <div class="preferences hidden">
+            <strong>Price range</strong>
+            <div class="slider-container">
+                <input type="range" class="slider low-price-range-slider" min="0" max="80" value="20" step="1">
+                <span class="low-price-range-value">€20</span> <!-- Display current low price range value -->
+                <input type="range" class="slider high-price-range-slider" min="0" max="80" value="40" step="1">
+                <span class="high-price-range-value">€40</span> <!-- Display current high price range value -->
+            </div>
+        </div>
+        <div class="preferences hidden">
+            <strong>Opening Hours</strong>
+            <div class="slider-container">
+                <input type="range" class="slider opening-hours-slider" min="0" max="96" value="40" step="1">
+                <span class="opening-hours-value">10:00</span> <!-- Display current opening hours -->
+            </div>
+        </div>
+        <div class="preferences hidden">
+            <strong>Accessibility</strong>
+            <div class="checkbox-container">
+                <label><input type="checkbox" name="kid_friendly"> Kid friendly</label>
+                <label><input type="checkbox" name="wheelchair"> Wheelchair access</label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to generate a target low price value within the range 15 to 30
+        function getTargetLowPriceValue() {
+            const min = 15;
+            const max = 30;
+            // Generates and returns a random value in the specified range
+            return Math.floor(Math.random() * (max - min + 1) + min);
+        }
+
+        // Function to generate a target high price value within the range 60 to 75
+        function getTargetHighPriceValue() {
+            const min = 60;
+            const max = 75;
+            // Generates and returns a random value in the specified range
+            return Math.floor(Math.random() * (max - min + 1) + min);
+        }
+
+        // Global configuration variables
+        const targetLowPriceValue = getTargetLowPriceValue(); // Value in the range 15-30
+        const targetHighPriceValue = getTargetHighPriceValue(); // Value in the range 60-75
+        const targetOpeningHours = "13:00"; // Target value for opening hours for reference and comparison
+
+        window.onload = function () {
+            const lowPriceRangeSlider = document.querySelector('.low-price-range-slider');
+            const highPriceRangeSlider = document.querySelector('.high-price-range-slider');
+            const lowPriceRangeValue = document.querySelector('.low-price-range-value');
+            const highPriceRangeValue = document.querySelector('.high-price-range-value');
+            const openingHoursSlider = document.querySelector('.opening-hours-slider');
+            const openingHoursValue = document.querySelector('.opening-hours-value');
+
+            function updateLowPriceDisplay() {
+                lowPriceRangeValue.textContent = '€' + lowPriceRangeSlider.value;
+            }
+
+            function updateHighPriceDisplay() {
+                highPriceRangeValue.textContent = '€' + highPriceRangeSlider.value;
+            }
+
+            function updateOpeningHoursDisplay() {
+                const totalMinutes = openingHoursSlider.value * 15;
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                openingHoursValue.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+            }
+
+            function adjustPriceRanges() {
+                if (parseInt(lowPriceRangeSlider.value) > parseInt(highPriceRangeSlider.value)) {
+                    highPriceRangeSlider.value = lowPriceRangeSlider.value;
+                    updateHighPriceDisplay();
+                }
+            }
+
+            lowPriceRangeSlider.addEventListener('input', function () {
+                updateLowPriceDisplay();
+                adjustPriceRanges();
+            });
+
+            highPriceRangeSlider.addEventListener('input', updateHighPriceDisplay);
+            openingHoursSlider.addEventListener('input', updateOpeningHoursDisplay);
+
+            updateLowPriceDisplay();
+            updateHighPriceDisplay();
+            updateOpeningHoursDisplay();
+
+            const startStopBtn = document.getElementById('startStopBtn');
+            const infoBox = document.querySelector('.info-box');
+            let timer = null;
+            let startTime = null;
+
+            startStopBtn.addEventListener('click', function () {
+                // Toggle visibility of elements
+                document.querySelectorAll('.preferences').forEach(function (element) {
+                    element.classList.remove('hidden');
+                });
+
+                if (startStopBtn.textContent === 'Start') {
+                    infoBox.textContent = `Change the Price range value from €${targetLowPriceValue} to €${targetHighPriceValue} and Opening Hours to ${targetOpeningHours}`;
+                    startTime = new Date();
+                    timer = setInterval(function () { }, 100);
+                    startStopBtn.textContent = 'Stop';
+                } else {
+                    if (parseInt(lowPriceRangeSlider.value) == targetLowPriceValue &&
+                        parseInt(highPriceRangeSlider.value) == targetHighPriceValue &&
+                        openingHoursValue.textContent === targetOpeningHours) {
+                        clearInterval(timer);
+                        const now = new Date();
+                        const totalTime = ((now - startTime) / 1000).toFixed(2);
+                        infoBox.textContent = `Task completed in ${totalTime} seconds`;
+                        startStopBtn.textContent = 'Start';
+                    } else {
+                        alert('Please ensure the preferences are adjusted correctly before stopping.');
+                    }
+                }
+            });
+        };
+    </script>
+
+</body>
+
+</html>
